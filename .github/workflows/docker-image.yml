@@ -24,4 +24,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/gourav1310/gitops:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/gitops:latest
