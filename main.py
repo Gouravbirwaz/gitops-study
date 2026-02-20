@@ -15,7 +15,7 @@ app=FastAPI()
 
 @app.get("/")
 def health_check():
-    return {"status":"healthy"}
+    return {"status":"healthy maaan "}
 
 @app.post("/predict")
 async def predict(request: Request):
