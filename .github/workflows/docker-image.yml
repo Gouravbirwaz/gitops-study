@@ -6,7 +6,9 @@ on:
       - main
     paths-ignore:
       - 'k8s/**'   # Prevent infinite CI loop when manifest updates
-
+permissions:
+  contents: write  
+  
 jobs:
   build:
     runs-on: ubuntu-latest
