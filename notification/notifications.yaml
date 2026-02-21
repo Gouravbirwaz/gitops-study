@@ -3,13 +3,14 @@ kind: ConfigMap
 metadata:
   name: argocd-notifications-cm
   namespace: argocd
+
 data:
 
   # Global context values usable in templates
   context: |
     argocdUrl: "http://localhost:5000"
 
-  # Global subscriptions
+  # Global subscriptions (applies to all applications)
   subscriptions: |
     - recipient: email:gouravbirwaz@gmail.com
       triggers:
@@ -50,14 +51,16 @@ data:
         ⏱ Finished At: {{ if .app.status.operationState }}{{ .app.status.operationState.finishedAt }}{{ end }}
         🔗 Details: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
 
-  # Trigger: Send email when health becomes Degraded
+  # Trigger: Send email when health becomes Degraded (only once per degradation)
   trigger.on-health-degraded: |
     - when: app.status.health.status == 'Degraded'
+      oncePer: app.status.health.status
       send:
         - email-health-degraded
 
   # Trigger: Send email when sync succeeds AND health is Healthy
   trigger.on-deployed: |
-    - when: app.status.operationState.phase == 'Succeeded' and app.status.health.status == 'Healthy'
+    - when: app.status.operationState != nil and app.status.operationState.phase == 'Succeeded' and app.status.health.status == 'Healthy'
+      oncePer: app.status.operationState.finishedAt
       send:
         - email-deployed
