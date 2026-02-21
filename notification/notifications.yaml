@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: argocd-notifications-cm
   namespace: argocd
+  annotations:
+    notifications.argoproj.io/subscribe.on-health-degraded.email: "gouravbirwaz@gmail.com"
+    notifications.argoproj.io/subscribe.on-deployed.email: "gouravbirwaz@gmail.com"
+spec:
 data:
 
   # Global context values usable in templates
