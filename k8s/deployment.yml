@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: iris-api
-          image: gourav1310/gitops:sha256:726a29c3a17f435e8ef1bbd9caa9fb5daf86dbb68639b993a9b694e47e0f7d20
+          image: gourav1310/gitops:581feb39849f1e016156453fb9f61bf28abe5abd
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
