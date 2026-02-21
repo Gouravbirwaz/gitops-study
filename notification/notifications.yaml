@@ -11,53 +11,53 @@ data:
 
   # Global subscriptions
   subscriptions: |
-    - recipient: gouravbirwaz@gmail.com
+    - recipient: email:gouravbirwaz@gmail.com
       triggers:
         - on-health-degraded
         - on-deployed
 
-    # Email service configuration (Gmail SMTP)
-    service.email.gmail: |
-      username: $email-username
-      password: $email-password
-      host: smtp.gmail.com
-      port: 587
-      from: $email-username
+  # Email service configuration (Gmail SMTP)
+  service.email: |
+    username: $email-username
+    password: $email-password
+    host: smtp.gmail.com
+    port: 587
+    from: $email-username
 
-    # Template: Application Health Degraded
-    template.email-health-degraded: |
-      email:
-        subject: "[ArgoCD] {{.app.metadata.name}} health is {{.app.status.health.status}}"
-        body: |
-          🚨 Application: {{.app.metadata.name}}
-          📂 Namespace: {{.app.metadata.namespace}}
-          🔄 Sync Status: {{.app.status.sync.status}}
-          📌 Revision: {{.app.status.sync.revision}}
-          ❤️ Health Status: {{.app.status.health.status}}
-          📝 Health Message: {{.app.status.health.message}}
-          🔗 Details: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
+  # Template: Application Health Degraded
+  template.email-health-degraded: |
+    email:
+      subject: "[ArgoCD] {{.app.metadata.name}} health is {{.app.status.health.status}}"
+      body: |
+        🚨 Application: {{.app.metadata.name}}
+        📂 Namespace: {{.app.metadata.namespace}}
+        🔄 Sync Status: {{.app.status.sync.status}}
+        📌 Revision: {{.app.status.sync.revision}}
+        ❤️ Health Status: {{.app.status.health.status}}
+        📝 Health Message: {{.app.status.health.message}}
+        🔗 Details: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
 
-    # Template: Application Successfully Deployed
-    template.email-deployed: |
-      email:
-        subject: "[ArgoCD] {{.app.metadata.name}} successfully deployed 🎉"
-        body: |
-          ✅ Application: {{.app.metadata.name}}
-          📂 Namespace: {{.app.metadata.namespace}}
-          🔄 Sync Status: {{.app.status.sync.status}}
-          📌 Revision: {{.app.status.sync.revision}}
-          ❤️ Health Status: {{.app.status.health.status}}
-          ⏱ Finished At: {{ if .app.status.operationState }}{{ .app.status.operationState.finishedAt }}{{ end }}
-          🔗 Details: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
+  # Template: Application Successfully Deployed
+  template.email-deployed: |
+    email:
+      subject: "[ArgoCD] {{.app.metadata.name}} successfully deployed 🎉"
+      body: |
+        ✅ Application: {{.app.metadata.name}}
+        📂 Namespace: {{.app.metadata.namespace}}
+        🔄 Sync Status: {{.app.status.sync.status}}
+        📌 Revision: {{.app.status.sync.revision}}
+        ❤️ Health Status: {{.app.status.health.status}}
+        ⏱ Finished At: {{ if .app.status.operationState }}{{ .app.status.operationState.finishedAt }}{{ end }}
+        🔗 Details: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
 
-    # Trigger: Send email when health becomes Degraded
-    trigger.on-health-degraded: |
-      - when: app.status.health.status == 'Degraded'
-        send:
-          - email-health-degraded
+  # Trigger: Send email when health becomes Degraded
+  trigger.on-health-degraded: |
+    - when: app.status.health.status == 'Degraded'
+      send:
+        - email-health-degraded
 
-    # Trigger: Send email when sync succeeds AND health is Healthy
-    trigger.on-deployed: |
-      - when: app.status.operationState.phase == 'Succeeded' and app.status.health.status == 'Healthy'
-        send:
-          - email-deployed
+  # Trigger: Send email when sync succeeds AND health is Healthy
+  trigger.on-deployed: |
+    - when: app.status.operationState.phase == 'Succeeded' and app.status.health.status == 'Healthy'
+      send:
+        - email-deployed
