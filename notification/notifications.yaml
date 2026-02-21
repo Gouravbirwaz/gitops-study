@@ -4,55 +4,53 @@ metadata:
   name: argocd-notifications-cm
   namespace: argocd
 data:
-  # Context section: defines variables available in notification templates
+
+  # Global context values usable in templates
   context: |
-    argocdUrl: "http:/localhost/:5000"  # Replace with your ArgoCD server URL
+    argocdUrl: "http://localhost:5000"
 
-  # Email service configuration: SMTP settings for sending emails
-  service.email: |
-    username: $email-username         # Email username (set as secret)
-    password: $email-password         # Email password (set as secret)
-    host: smtp.gmail.com              # SMTP server host
-    port: 465                         # SMTP server port (SSL)
-    from: $email-username             # Sender email address
+  # Email service configuration (Gmail SMTP)
+  service.email.gmail: |
+    username: $email-username
+    password: $email-password
+    host: smtp.gmail.com
+    port: 587
+    from: $email-username
 
-  # Template for Degraded health: email content when app health is degraded
+  # Template: Application Health Degraded
   template.email-health-degraded: |
     email:
       subject: "[ArgoCD] {{.app.metadata.name}} health is {{.app.status.health.status}}"
-    message: |
-      🚨 Application: {{.app.metadata.name}}
-      📂 Namespace: {{.app.metadata.namespace}}
-      🔄 Sync status: {{.app.status.sync.status}}
-      📌 Revision: {{.app.status.sync.revision}}
-      ❤️ Health status: {{.app.status.health.status}}
-      📝 Health message: {{.app.status.health.message}}
-      ⚙️ Last operation: {{ if .app.operationState }}{{ .app.operationState.phase }}{{ else }}<none>{{ end }}
-      🔗 Details: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
+      body: |
+        🚨 Application: {{.app.metadata.name}}
+        📂 Namespace: {{.app.metadata.namespace}}
+        🔄 Sync Status: {{.app.status.sync.status}}
+        📌 Revision: {{.app.status.sync.revision}}
+        ❤️ Health Status: {{.app.status.health.status}}
+        📝 Health Message: {{.app.status.health.message}}
+        🔗 Details: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
 
-  # Template for Deployed (synced + healthy): email content when app is successfully deployed
+  # Template: Application Successfully Deployed
   template.email-deployed: |
     email:
       subject: "[ArgoCD] {{.app.metadata.name}} successfully deployed 🎉"
-    message: |
-      ✅ Application: {{.app.metadata.name}}
-      📂 Namespace: {{.app.metadata.namespace}}
-      🔄 Sync status: {{.app.status.sync.status}}
-      📌 Revision: {{.app.status.sync.revision}}
-      ❤️ Health status: {{.app.status.health.status}}
-      ⚙️ Last operation: {{ if .app.operationState }}{{ .app.operationState.phase }}{{ else }}<none>{{ end }}
-      Finished at: {{ if .app.operationState }}{{ .app.operationState.finishedAt }}{{ end }}
-      🔗 Details: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
+      body: |
+        ✅ Application: {{.app.metadata.name}}
+        📂 Namespace: {{.app.metadata.namespace}}
+        🔄 Sync Status: {{.app.status.sync.status}}
+        📌 Revision: {{.app.status.sync.revision}}
+        ❤️ Health Status: {{.app.status.health.status}}
+        ⏱ Finished At: {{ if .app.status.operationState }}{{ .app.status.operationState.finishedAt }}{{ end }}
+        🔗 Details: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
 
-  # Trigger for Degraded health: sends email when app health is degraded
+  # Trigger: Send email when health becomes Degraded
   trigger.on-health-degraded: |
     - when: app.status.health.status == 'Degraded'
-      send: [email-health-degraded]
+      send:
+        - email-health-degraded
 
-  # Trigger for Deployed: sends email when app is synced and healthy
+  # Trigger: Send email when sync succeeds AND health is Healthy
   trigger.on-deployed: |
     - when: app.status.operationState.phase == 'Succeeded' and app.status.health.status == 'Healthy'
-      send: [email-deployed]
-
-# This ConfigMap configures ArgoCD Notifications to send email alerts for application health changes.
-# It defines SMTP settings, notification templates, and triggers for sending emails on specific events.
+      send:
+        - email-deployed
