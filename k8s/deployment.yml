@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: iris-api-deployment
+  annotations:
+    notifications.argoproj.io/subscribe.on-health-degraded.email: "gouravbirwaz@gmail.com" 
+    notifications.argoproj.io/subscribe.on-deployed.email: "gouravbirwaz@gmail.com" 
 spec:
   replicas: 2
   selector:
